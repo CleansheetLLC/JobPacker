@@ -35,8 +35,15 @@ DEFAULT_CONFIG = {
     "job_boards": ["indeed", "linkedin", "glassdoor", "zip_recruiter", "google"]
 }
 
-# Available job boards
+# Available job boards with reliability notes
 ALL_JOB_BOARDS = ["indeed", "linkedin", "glassdoor", "zip_recruiter", "google"]
+BOARD_NOTES = {
+    "indeed": "Most reliable",
+    "linkedin": "Rate limited",
+    "glassdoor": "",
+    "zip_recruiter": "US/Canada only",
+    "google": "Finicky syntax"
+}
 
 # Job type options
 JOB_TYPES = [None, "fulltime", "parttime", "internship", "contract"]
@@ -125,7 +132,9 @@ def select_job_boards(current: list) -> list:
     console.print("\n[bold]Select Job Boards[/] (comma-separated numbers)")
     for i, board in enumerate(ALL_JOB_BOARDS, 1):
         status = "[green]✓[/]" if board in current else "[dim]○[/]"
-        console.print(f"  {status} [{i}] {board}")
+        note = BOARD_NOTES.get(board, "")
+        note_str = f" [dim]({note})[/]" if note else ""
+        console.print(f"  {status} [{i}] {board}{note_str}")
 
     console.print("\nEnter numbers (e.g., 1,2,3) or 'all' for all boards")
     selection = Prompt.ask("Selection", default="all")
@@ -305,10 +314,16 @@ def export_jobs(jobs: list, search_term: str = "") -> None:
         }
         cleansheet_jobs.append(cleansheet_job)
 
+    # Wrap in Cleansheet import format
+    export_data = {
+        "exportType": "jobspy_harvest",
+        "jobs": cleansheet_jobs
+    }
+
     # Write file
     try:
         with open(filename, "w", encoding="utf-8") as f:
-            json.dump(cleansheet_jobs, f, indent=2, ensure_ascii=False)
+            json.dump(export_data, f, indent=2, ensure_ascii=False)
 
         console.print(f"\n[green]Exported {len(cleansheet_jobs)} jobs to {filename}[/]")
         console.print("[dim]Import this file into Cleansheet Job Opportunities[/]")

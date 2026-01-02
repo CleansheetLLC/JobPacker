@@ -75,21 +75,24 @@ Settings persist between sessions.
 Exports JSON compatible with Cleansheet Job Opportunities import:
 
 ```json
-[
-  {
-    "id": "uuid",
-    "company": "Company Name",
-    "title": "Job Title",
-    "location": "City, State",
-    "url": "https://...",
-    "description": "Job description...",
-    "salary": "$100,000 - $120,000",
-    "datePosted": "2025-01-02",
-    "source": "indeed",
-    "status": "Saved",
-    "tags": []
-  }
-]
+{
+  "exportType": "jobspy_harvest",
+  "jobs": [
+    {
+      "id": "uuid",
+      "company": "Company Name",
+      "title": "Job Title",
+      "location": "City, State",
+      "url": "https://...",
+      "description": "Job description...",
+      "salary": "$100,000 - $120,000",
+      "datePosted": "2025-01-02",
+      "source": "indeed",
+      "status": "Saved",
+      "tags": []
+    }
+  ]
+}
 ```
 
 ## Troubleshooting
@@ -109,7 +112,20 @@ Exports JSON compatible with Cleansheet Job Opportunities import:
 ### LinkedIn errors
 
 - LinkedIn has strict anti-scraping measures
+- Rate limits around 10 pages without proxies
 - Use Indeed for most reliable results
+
+### ZipRecruiter not returning results
+
+- Only works for US/Canada locations
+- Uses location parameter only (search terms may be ignored)
+- Try "USA" or a specific US city
+
+### Google Jobs not returning results
+
+- Requires exact Google Jobs search syntax
+- Very finicky with search terms
+- Recommended: Use Indeed/LinkedIn instead
 
 ## Dependencies
 
