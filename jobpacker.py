@@ -7,17 +7,16 @@ import json
 import math
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.prompt import Prompt, Confirm, IntPrompt
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich import box
-
 from jobspy import scrape_jobs
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm, IntPrompt, Prompt
+from rich.table import Table
 
 # Initialize rich console
 console = Console()
@@ -32,7 +31,7 @@ DEFAULT_CONFIG = {
     "results_per_site": 15,
     "remote_only": False,
     "job_type": None,
-    "job_boards": ["indeed", "linkedin", "glassdoor", "zip_recruiter", "google"]
+    "job_boards": ["indeed", "linkedin", "glassdoor", "zip_recruiter", "google"],
 }
 
 # Available job boards with reliability notes
@@ -42,7 +41,7 @@ BOARD_NOTES = {
     "linkedin": "Rate limited",
     "glassdoor": "",
     "zip_recruiter": "US/Canada only",
-    "google": "Finicky syntax"
+    "google": "Finicky syntax",
 }
 
 # Job type options
@@ -53,11 +52,11 @@ def load_config() -> dict:
     """Load configuration from file or return defaults."""
     if CONFIG_PATH.exists():
         try:
-            with open(CONFIG_PATH, "r") as f:
+            with open(CONFIG_PATH) as f:
                 config = json.load(f)
                 # Merge with defaults in case new options added
                 return {**DEFAULT_CONFIG, **config}
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             pass
     return DEFAULT_CONFIG.copy()
 
@@ -75,8 +74,14 @@ def display_banner() -> None:
      ║║ ║╠╩╗╠═╝╠═╣║  ╠╩╗║╣ ╠╦╝
     ╚╝╚═╝╚═╝╩  ╩ ╩╚═╝╩ ╩╚═╝╩╚═
     """
-    console.print(Panel(banner, title="[bold blue]Job Harvester for Cleansheet[/]",
-                        subtitle="[dim]Powered by JobSpy[/]", box=box.DOUBLE))
+    console.print(
+        Panel(
+            banner,
+            title="[bold blue]Job Harvester for Cleansheet[/]",
+            subtitle="[dim]Powered by JobSpy[/]",
+            box=box.DOUBLE,
+        )
+    )
 
 
 def display_main_menu() -> str:
@@ -104,17 +109,25 @@ def display_settings_menu(config: dict) -> dict:
         console.print("  [0] Back to Main Menu")
         console.print()
 
-        choice = Prompt.ask("[bold]Select option[/]", choices=["0", "1", "2", "3", "4", "5", "6"], default="0")
+        choice = Prompt.ask(
+            "[bold]Select option[/]", choices=["0", "1", "2", "3", "4", "5", "6"], default="0"
+        )
 
         if choice == "0":
             save_config(config)
             break
         elif choice == "1":
-            config["default_search"] = Prompt.ask("Default search terms", default=config["default_search"])
+            config["default_search"] = Prompt.ask(
+                "Default search terms", default=config["default_search"]
+            )
         elif choice == "2":
-            config["default_location"] = Prompt.ask("Default location", default=config["default_location"])
+            config["default_location"] = Prompt.ask(
+                "Default location", default=config["default_location"]
+            )
         elif choice == "3":
-            config["results_per_site"] = IntPrompt.ask("Results per site", default=config["results_per_site"])
+            config["results_per_site"] = IntPrompt.ask(
+                "Results per site", default=config["results_per_site"]
+            )
         elif choice == "4":
             config["remote_only"] = Confirm.ask("Remote jobs only?", default=config["remote_only"])
         elif choice == "5":
@@ -144,7 +157,7 @@ def select_job_boards(current: list) -> list:
 
     try:
         indices = [int(x.strip()) for x in selection.split(",")]
-        selected = [ALL_JOB_BOARDS[i-1] for i in indices if 1 <= i <= len(ALL_JOB_BOARDS)]
+        selected = [ALL_JOB_BOARDS[i - 1] for i in indices if 1 <= i <= len(ALL_JOB_BOARDS)]
         return selected if selected else current
     except (ValueError, IndexError):
         console.print("[red]Invalid selection, keeping current boards[/]")
@@ -168,7 +181,9 @@ def search_jobs(config: dict) -> tuple[list, str]:
     location = Prompt.ask("Location", default=config["default_location"])
 
     # Show current settings
-    console.print(f"\n[dim]Searching {len(config['job_boards'])} boards, {config['results_per_site']} results each[/]")
+    console.print(
+        f"\n[dim]Searching {len(config['job_boards'])} boards, {config['results_per_site']} results each[/]"
+    )
     if config["remote_only"]:
         console.print("[dim]Remote jobs only[/]")
     if config["job_type"]:
@@ -180,7 +195,7 @@ def search_jobs(config: dict) -> tuple[list, str]:
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
-        transient=True
+        transient=True,
     ) as progress:
         task = progress.add_task("Searching job boards...", total=None)
 
@@ -192,7 +207,7 @@ def search_jobs(config: dict) -> tuple[list, str]:
                 results_wanted=config["results_per_site"],
                 is_remote=config["remote_only"],
                 job_type=config["job_type"],
-                country_indeed="USA"
+                country_indeed="USA",
             )
 
             progress.update(task, description="Processing results...")
@@ -249,12 +264,12 @@ def export_jobs(jobs: list, search_term: str = "") -> None:
 
     # Build filename with search term and timezone
     # Sanitize search term for filename (replace spaces/special chars)
-    safe_search = re.sub(r'[^\w\-]', '_', search_term.lower()).strip('_') if search_term else "jobs"
-    safe_search = re.sub(r'_+', '_', safe_search)  # Collapse multiple underscores
+    safe_search = re.sub(r"[^\w\-]", "_", search_term.lower()).strip("_") if search_term else "jobs"
+    safe_search = re.sub(r"_+", "_", safe_search)  # Collapse multiple underscores
 
     # Get local timezone offset (e.g., -0500, +0100)
     now = datetime.now().astimezone()
-    tz_offset = now.strftime('%z')  # Returns like -0500 or +0100
+    tz_offset = now.strftime("%z")  # Returns like -0500 or +0100
 
     default_name = f"{safe_search}_{now.strftime('%Y%m%d_%H%M%S')}{tz_offset}.json"
     filename = Prompt.ask("Filename", default=default_name)
@@ -310,15 +325,12 @@ def export_jobs(jobs: list, search_term: str = "") -> None:
             "datePosted": date_posted,
             "source": str(job.get("site", "")),
             "status": "Saved",
-            "tags": []
+            "tags": [],
         }
         cleansheet_jobs.append(cleansheet_job)
 
     # Wrap in Cleansheet import format
-    export_data = {
-        "exportType": "jobspy_harvest",
-        "jobs": cleansheet_jobs
-    }
+    export_data = {"exportType": "jobspy_harvest", "jobs": cleansheet_jobs}
 
     # Write file
     try:
@@ -328,7 +340,7 @@ def export_jobs(jobs: list, search_term: str = "") -> None:
         console.print(f"\n[green]Exported {len(cleansheet_jobs)} jobs to {filename}[/]")
         console.print("[dim]Import this file into Cleansheet Job Opportunities[/]")
 
-    except IOError as e:
+    except OSError as e:
         console.print(f"[red]Export failed: {e}[/]")
 
 

@@ -1,5 +1,10 @@
 # JobPacker
 
+[![Tests](https://github.com/CleansheetLLC/JobPacker/actions/workflows/test.yml/badge.svg)](https://github.com/CleansheetLLC/JobPacker/actions/workflows/test.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A beautiful, menu-driven CLI tool for harvesting job listings from multiple job boards. Exports to Cleansheet-compatible JSON format.
 
 ## Features
@@ -131,6 +136,26 @@ Exports JSON compatible with Cleansheet Job Opportunities import:
 
 - [python-jobspy](https://github.com/Bunsly/JobSpy) - Job board scraping
 - [rich](https://github.com/Textualize/rich) - Beautiful terminal formatting
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Setup
+
+```bash
+# Install dev dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest
+
+# Format code
+black jobpacker.py tests/
+
+# Lint
+ruff check jobpacker.py tests/
+```
 
 ## License
 
