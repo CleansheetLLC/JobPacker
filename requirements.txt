@@ -1,0 +1,4 @@
+rich>=13.0.0
+numpy>=1.26.0
+pandas>=2.0.0
+python-jobspy>=1.1.75
