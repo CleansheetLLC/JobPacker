@@ -15,6 +15,13 @@ A beautiful, menu-driven CLI tool for harvesting job listings from multiple job 
 - Cross-platform: Windows, Mac, Linux
 - Export directly to Cleansheet JSON format
 
+## Quick Download
+
+| Platform | Download |
+|----------|----------|
+| **Windows** | [JobPacker.exe](https://github.com/CleansheetLLC/JobPacker/raw/main/dist/JobPacker.exe) (80 MB) |
+| **Mac/Linux** | [jobpacker.py](https://github.com/CleansheetLLC/JobPacker/raw/main/jobpacker.py) (requires Python 3.12) |
+
 ## Installation
 
 ### Requirements
